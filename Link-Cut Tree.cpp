@@ -14,7 +14,7 @@ void pull(Tree* t) {
     t->sum = (t->ch[0] ? t->ch[0]->sum : 0) + t->val + (t->ch[1] ? t->ch[1]->sum : 0);
 }
 
-// fun
+// treefun
 bool isroot(Tree* t) {
     return t->p == nullptr || (t->p->ch[0] != t && t->p->ch[1] != t); 
 }
@@ -97,7 +97,7 @@ void makeroot(Tree* t) {
 
 Tree* findroot(Tree* t) {
 	if (!t) return nullptr;
-    access(t); // !!
+    access(t); 
 	Tree* q = t;
 	while (true) {
 		push(q);
@@ -130,5 +130,5 @@ void cut(Tree* t) {
     t->ch[0]->p = nullptr;
     t->ch[0] = nullptr;
     pull(t);
-
 }
+
