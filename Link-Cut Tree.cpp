@@ -1,103 +1,101 @@
 //Link-Cut Tree
 //
+
 struct Tree {
-	Tree* p;
-    Tree* ch[2];
-    bool rev; 
-    int val, sum, siz;
-    Tree() : p(nullptr), ch{nullptr, nullptr}, 
-    	rev(false), val(0), sum(0), siz(1) {}
+	Tree* ch[2], *p;
+	bool rev;
+	int max, val;
+	Tree() : ch{nullptr, nullptr}, p(nullptr), rev(false),
+		max(0), val(0) {}
 };
 
-// pull 
+// pull(Max_Val)
 void pull(Tree* t) {
-    t->sum = (t->ch[0] ? t->ch[0]->sum : 0) + t->val + (t->ch[1] ? t->ch[1]->sum : 0);
+	t->max = t->val;
+	if (t->ch[0] && t->max < t->ch[0]->max) {
+		t->max = t->ch[0]->max;
+	}
+	if (t->ch[1] && t->max < t->ch[1]->max) {
+		t->max = t->ch[1]->max;
+	}
 }
 
-// treefun
 bool isroot(Tree* t) {
-    return t->p == nullptr || (t->p->ch[0] != t && t->p->ch[1] != t); 
+	return t->p == nullptr || (t->p->ch[0] != t && t->p->ch[1] != t);
 }
 
-int pos(Tree* t) {
-    return t->p->ch[1] == t;
-}
-
-// push
 void reverse(Tree* t) {
-    if (t) {
-    	std::swap(t->ch[0], t->ch[1]);
-    	t->rev ^= 1;
-    }
+	if (t) {
+		std::swap(t->ch[0], t->ch[1]);
+		t->rev ^= 1;
+	}
 }
 
 void push(Tree* t) {
-    if (t->rev) {
-        reverse(t->ch[0]);
-        reverse(t->ch[1]);
-    }
-    t->rev = false;
+	if (t->rev) {
+		reverse(t->ch[0]);
+		reverse(t->ch[1]);
+		t->rev = false;
+	}		
 }
 
 void pushAll(Tree* t) {
-    if (!isroot(t)) {
-        pushAll(t->p);
-    }
-    push(t);
+	if (!isroot(t)) {
+		pushAll(t->p);
+	}
+	push(t);
+} 
+
+int pos(Tree* t) {
+	return t->p->ch[1] == t;
 }
 
-// splay
 void rotate(Tree* t) {
-    Tree* q = t->p;
+	Tree* q = t->p;
 	int x = !pos(t);
-    q->ch[!x] = t->ch[x];
-    if (t->ch[x]) t->ch[x]->p = q;
-    t->p = q->p;
-    if (!isroot(q)) q->p->ch[pos(q)] = t;
-    t->ch[x] = q;
-    q->p = t;
-    pull(q);
+	q->ch[!x] = t->ch[x];
+	if (t->ch[x]) t->ch[x]->p = q;
+	t->p = q->p;
+	if (!isroot(q)) q->p->ch[pos(q)] = t;
+	t->ch[x] = q;
+	q->p = t;
+	pull(q);
 }
 
 void splay(Tree* t) {
-    pushAll(t);
-    while (!isroot(t)) {
-        if (!isroot(t->p)) {
-            if (pos(t) == pos(t->p)) {
+	pushAll(t);
+	while (!isroot(t)) {
+		if (!isroot(t->p)) {
+			if (pos(t) == pos(t->p)) {
 				rotate(t->p);
-            } else {
-                rotate(t);
-            }
-        }
-        rotate(t);
-    }
-    pull(t);
+			} else {
+				rotate(t);
+			}
+		}
+		rotate(t);
+	}
+	pull(t);
 }
 
 Tree* access(Tree* t) {
 	Tree* q = nullptr;
-    for (Tree* i = t; i; q = i, i = i->p) {
-        splay(i);
-        i->ch[1] = q;
-        pull(i); 
-    }
-    splay(t); 
-    return q;
+	for (Tree* i = t; i; q = i, i = i->p) {
+		splay(i);
+		i->ch[1] = q;
+		pull(i);
+	}
+	splay(t);
+	return q;
 }
 
-Tree* lca(Tree* u, Tree* v) {
-    access(u);
-    return access(v);
+void makeroot(Tree* t) {
+	access(t);
+	reverse(t);
 }
 
-void makeroot(Tree* t) { 
-    access(t);
-    reverse(t);
-}
-
-Tree* findroot(Tree* t) {
+Tree* findTree(Tree* t) {
 	if (!t) return nullptr;
-    access(t); 
+	access(t);
 	Tree* q = t;
 	while (true) {
 		push(q);
@@ -109,26 +107,27 @@ Tree* findroot(Tree* t) {
 }
 
 void link(Tree* u, Tree* v) {
-    makeroot(u);
-    u->p = v; 
+	makeroot(u);
+	u->p = v;
 }
 
 void split(Tree* u, Tree* v) {
-    makeroot(u);
-    access(v);
+	makeroot(u);
+	access(v);
 }
 
 void cut(Tree* u, Tree* v) {
-    split(u, v);
-    u->p = v->ch[0] = nullptr;
-    pull(v);
+	split(u, v);
+	u->p = v->ch[0] = nullptr;
+	pull(v);	
 }
 
-void cut(Tree* t) { 
-    access(t);
-    assert(t->ch[0]);
-    t->ch[0]->p = nullptr;
-    t->ch[0] = nullptr;
-    pull(t);
+void cut(Tree* t) {
+	access(t);
+	assert(t->ch[0]);
+	t->ch[0]->p = nullptr;
+	t->ch[0] = nullptr;
+	pull(t);
 }
+
 
