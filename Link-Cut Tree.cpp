@@ -1,3 +1,5 @@
+//Link-Cut Tree
+//
 struct Tree {
 	Tree* p;
     Tree* ch[2];
@@ -128,4 +130,5 @@ void cut(Tree* t) {
     t->ch[0]->p = nullptr;
     t->ch[0] = nullptr;
     pull(t);
+
 }
